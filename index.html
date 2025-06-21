@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLIPS TECHNICAL COLLEGE - Login</title>
     <link rel="stylesheet" href="styles.css"/>
+    <script>
+        window.APP_CONFIG = {
+            BACKEND_URL: 'https://clipscollegebackend.vercel.app',
+            SUPABASE_URL: 'https://jvwgenhthywvouayzzmt.supabase.co',
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2d2dlbmh0aHl3dm91YXl6em10Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTQxMDE5MywiZXhwIjoyMDY0OTg2MTkzfQ.pg9irMI5z7Pjm13Tzse39GrDY9GllsxFUxHx6DjGCEs'
+        };
+    </script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="config.js"></script>
     <script src="api.js" defer></script>
 </head>
 <body>
@@ -20,8 +29,8 @@
         <p style="color: #04b613; margin-bottom: 25px;">Please fill in your details to log in</p>
         
         <div class="input-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder=" email/admission number">
+            <label for="username">Registration Number</label>
+            <input type="text" id="username" placeholder="Enter your registration/admission number">
         </div>
         
         <div class="input-group">
@@ -34,10 +43,44 @@
                 <input type="checkbox" id="remember">
                 <label for="remember">Remember me</label>
             </div>
-            <a href="#" class="forgot-password">Forgot Password?</a>
+            <a href="#" class="forgot-password" onclick="showForgotPasswordModal()">Forgot Password?</a>
         </div>
         
         <button class="login-button" onclick="login()">Sign In</button>
+        <div id="loginStatus" class="login-status"></div>
     </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeForgotPasswordModal()">&times;</span>
+            <h2>Reset Password</h2>
+            <p>Enter your details to reset your password:</p>
+            <div class="input-group">
+                <label for="resetRegNumber">Registration Number</label>
+                <input type="text" id="resetRegNumber" placeholder="Enter your registration number">
+            </div>
+            <div class="input-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+            <div class="input-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+            <button class="login-button" onclick="resetPassword()">Reset Password</button>
+            <div id="resetStatus" class="login-status"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if there's a BACKEND_URL in window before using it
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.BACKEND_URL && window.APP_CONFIG) {
+                window.BACKEND_URL = window.APP_CONFIG.BACKEND_URL;
+            }
+            console.log('Backend URL:', window.BACKEND_URL || 'Not defined');
+        });
+    </script>
 </body>
 </html>

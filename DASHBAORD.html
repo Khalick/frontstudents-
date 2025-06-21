@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLIPS TECHNICAL COLLAGE</title>
+    <title>CLIPS TECHNICAL COLLEGE</title>
     <link rel="stylesheet" href="dashboard.css"/>
+    <script>
+        window.APP_CONFIG = {
+            BACKEND_URL: 'https://clipscollegebackend.vercel.app',
+            SUPABASE_URL: 'https://jvwgenhthywvouayzzmt.supabase.co',
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2d2dlbmh0aHl3dm91YXl6em10Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTQxMDE5MywiZXhwIjoyMDY0OTg2MTkzfQ.pg9irMI5z7Pjm13Tzse39GrDY9GllsxFUxHx6DjGCEs'
+        };
+    </script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="config.js"></script>
     <script src="dashboard.js"></script> 
 </head>
 <body>
@@ -91,72 +100,77 @@
                 <div class="card">
                     <h2>Available Units</h2>
                     <ul class="unit-list" id="availableUnits"></ul>
-                    <div id="unitRegisterStatus" style="color:green;"></div>
+                    <div id="unitRegisterStatus"></div>
+                </div>
+                
+                <div class="card student-summary">
+                    <h2>Student Information</h2>
+                    <div class="student-summary-details">
+                        <div class="student-info-item">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value" id="dashboardName">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Registration Number:</span>
+                            <span class="info-value" id="dashboardRegNumber">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Year/Semester:</span>
+                            <span class="info-value" id="dashboardYearSemester">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Course:</span>
+                            <span class="info-value" id="dashboardCourse">Loading...</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card">
+                    <h2>Fee Information</h2>
                     <div class="fee-details">
                         <div class="card2">
                             <div class="fee-item">
                                 <span class="fee-label">Fee Balance:</span>
-                                <span class="fee-value" id="feeBalance">KSH 15,000</span>
+                                <span class="fee-value" id="feeBalance">Loading...</span>
                             </div>
                         </div>
                         <div class="card2">
                             <div class="fee-item">
                                 <span class="fee-label">Total Paid:</span>
-                                <span class="fee-value" id="totalPaid">KSH 35,000</span>
+                                <span class="fee-value" id="totalPaid">Loading...</span>
                             </div>
                         </div>
                         <div class="card2">
                             <div class="fee-item">
                                 <span class="fee-label">Semester Fee:</span>
-                                <span class="fee-value" id="semesterFee">KSH 50,000</span>
+                                <span class="fee-value" id="semesterFee">Loading...</span>
                             </div>
                         </div>
                     </div>
                     <div class="free-balance">
-                        <p>HI, <span id="greetingName">Oduor</span></p>
-                        <p><B>Course: <span id="displayCourse">Computer Science</span></B></p>
-                        <p>Current Session Progress: <span id="sessionProgress">65%</span></p>
+                        <p>Current Session Progress: <span id="sessionProgress">Loading...</span></p>
                     </div>
                 </div>
                 <div class="card">
                     <h2>Exam Card</h2>
                     <button id="downloadExamCardBtn">Download Exam Card</button>
-                    <div id="examCardStatus" style="color:red;"></div>
+                    <div id="examCardStatus"></div>
                 </div>
                 <div class="card">
                     <h2>Finance</h2>
                     <button id="downloadFeeStatementBtn">Download Fee Statement</button>
                     <button id="downloadFeeReceiptBtn">Download Fee Receipt</button>
-                    <div id="financeStatus" style="color:red;"></div>
-                </div>
-                <div class="card">
-                    <h2>Upload Fee Statement/Receipt (Admin)</h2>
-                    <form id="uploadFinanceForm">
-                        <label>Type:</label>
-                        <select id="financeType">
-                            <option value="statement">Fee Statement</option>
-                            <option value="receipt">Fee Receipt</option>
-                        </select>
-                        <label>Student ID:</label>
-                        <input type="text" id="financeStudentId" required>
-                        <label>File:</label>
-                        <input type="file" id="financeFile" required>
-                        <button type="submit">Upload</button>
-                        <div class="status" id="financeUploadStatus"></div>
-                    </form>
+                    <div id="financeStatus"></div>
                 </div>
             </div>
             
             <div class="student-profile">
                 <img src="side image.jpg" alt="Student Image" class="student-image" id="studentImage">
                 <div class="student-details">
-                    <h2 id="studentName">Brian Oduor</h2>
-                    <p><strong>Registration Number:</strong> <span id="regNumber">CLP/2023/001</span></p>
-                    <p><strong>Course:</strong> <span id="courseName">Diploma in Computer Science</span></p>
-                    <p><strong>Year/Semester:</strong> <span id="yearSemester">Year 2, Semester 1</span></p>
+                    <h2 id="studentName">Loading...</h2>
+                    <p><strong>Registration Number:</strong> <span id="regNumber">Loading...</span></p>
+                    <p><strong>Course:</strong> <span id="courseName">Loading...</span></p>
+                    <p><strong>Year/Semester:</strong> <span id="yearSemester">Loading...</span></p>
                 </div>
             </div>
         </div>
