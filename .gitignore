@@ -18,7 +18,6 @@ Thumbs.db
 # Environment variables and config
 .env
 .env.*
-config.js
 
 # Vercel
 .vercel/
