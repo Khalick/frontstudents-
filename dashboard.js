@@ -130,8 +130,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Call fetchStudentData
-    // fetchStudentData();
+    // Set basic student info immediately
+    const basicStudent = {
+        name: username || 'Student',
+        registration_number: registrationNumber || username || 'N/A',
+        course: 'N/A',
+        level_of_study: 'N/A'
+    };
+    populateStudentData(basicStudent, [], { fee_balance: 0, total_paid: 0, semester_fee: 0, session_progress: 0 });
     
     // Fetch available units from backend
     async function fetchAvailableUnits() {
@@ -377,6 +383,10 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // fetchAvailableUnits();
+    
+    // Clear registered units list
+    const unitsList = document.getElementById('registeredUnits');
+    unitsList.innerHTML = '<li><strong>Unit Name</strong><strong>Unit Code</strong><strong>Status</strong></li><li><span>No registered units found</span></li>';
       document.getElementById('logoutBtn').addEventListener('click', function() {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
