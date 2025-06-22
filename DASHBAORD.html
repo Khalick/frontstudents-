@@ -7,8 +7,8 @@
     <meta name="theme-color" content="#1a022b">
     <title>CLIPS TECHNICAL COLLEGE</title>
     <link rel="stylesheet" href="dashboard.css"/>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="clips-logo.png">
+    <link rel="icon" href="logo.jpg" type="image/x-icon">
+    <link rel="apple-touch-icon" href="logo.jpg">
     <link rel="manifest" href="manifest.json">
     <script>
         window.APP_CONFIG = {
@@ -41,48 +41,48 @@
         <div class="container">
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="#">Dashboard</a>
+                    <a href="#student-info">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Finance</a>
+                    <a href="#finance">Finance</a>
                     <div class="dropdown-menu">
-                        <a href="#">Fee Statement</a>
-                        <a href="#">Financial Receipt</a>
+                        <a href="#" onclick="downloadFeeStatement(); return false;">Fee Statement</a>
+                        <a href="#" onclick="downloadFeeReceipt(); return false;">Financial Receipt</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Academics</a>
+                    <a href="#units-registered">Academics</a>
                     <div class="dropdown-menu">
-                        <a href="#">Exam Card</a>
-                        <a href="#">Results</a>
-                        <a href="#">Register Units</a>
+                        <a href="#exam-card">Exam Card</a>
+                        <a href="#" onclick="showResults(); return false;">Results</a>
+                        <a href="#units-available">Register Units</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Timetable</a>
+                    <a href="#" onclick="showTimetable(); return false;">Timetable</a>
                     <div class="dropdown-menu">
-                        <a href="#">Sem 1 timetable</a>
-                        <a href="#">Sem 2 timetable</a>
+                        <a href="#" onclick="showSem1Timetable(); return false;">Sem 1 timetable</a>
+                        <a href="#" onclick="showSem2Timetable(); return false;">Sem 2 timetable</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Evaluation</a>
+                    <a href="#" onclick="showEvaluation(); return false;">Evaluation</a>
                     <div class="dropdown-menu">
-                        <a href="#">Course evaluation </a>
-                        <a href="#">Semester evaluation</a>
+                        <a href="#" onclick="showCourseEvaluation(); return false;">Course evaluation</a>
+                        <a href="#" onclick="showSemesterEvaluation(); return false;">Semester evaluation</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Socials</a>
+                    <a href="#" onclick="showSocials(); return false;">Socials</a>
                     <div class="dropdown-menu">
-                        <a href="#">News</a>
-                        <a href="#">Events</a>
+                        <a href="#" onclick="showNews(); return false;">News</a>
+                        <a href="#" onclick="showEvents(); return false;">Events</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a href="#">Settings</a>
+                    <a href="#" onclick="showSettings(); return false;">Settings</a>
                     <div class="dropdown-menu">
-                        <a href="#">Change Password</a>
+                        <a href="#" onclick="showChangePassword(); return false;">Change Password</a>
                     </div>
                 </li>
             </ul>
@@ -92,7 +92,7 @@
     <div class="container">
         <div class="dashboard-container">
             <div class="dashboard">
-                <div class="card">
+                <div class="card" id="units-registered">
                     <h2>Current Registered Units</h2>
                     <ul class="unit-list" id="registeredUnits">
                         <li>
@@ -102,13 +102,13 @@
                         </li>
                     </ul>
                 </div>
-                <div class="card">
+                <div class="card" id="units-available">
                     <h2>Available Units</h2>
                     <ul class="unit-list" id="availableUnits"></ul>
                     <div id="unitRegisterStatus"></div>
                 </div>
                 
-                <div class="card student-summary">
+                <div class="card student-summary" id="student-info">
                     <h2>Student Information</h2>
                     <div class="student-summary-details">
                         <div class="student-info-item">
@@ -130,7 +130,7 @@
                     </div>
                 </div>
                 
-                <div class="card">
+                <div class="card" id="fee-info">
                     <h2>Fee Information</h2>
                     <div class="fee-details">
                         <div class="card2">
@@ -156,12 +156,12 @@
                         <p>Current Session Progress: <span id="sessionProgress">Loading...</span></p>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" id="exam-card">
                     <h2>Exam Card</h2>
                     <button id="downloadExamCardBtn">Download Exam Card</button>
                     <div id="examCardStatus"></div>
                 </div>
-                <div class="card">
+                <div class="card" id="finance">
                     <h2>Finance</h2>
                     <button id="downloadFeeStatementBtn">Download Fee Statement</button>
                     <button id="downloadFeeReceiptBtn">Download Fee Receipt</button>

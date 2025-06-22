@@ -404,4 +404,385 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error:', error));
     */
+    
+    // Helper function to highlight the active nav item
+function setActiveNavItem(itemSelector) {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const activeItem = document.querySelector(itemSelector);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+}
+
+// Function to scroll to a section smoothly
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        window.scrollTo({
+            top: section.offsetTop - 100, // Offset for header
+            behavior: 'smooth'
+        });
+    }
+}
+
+// Highlight sections based on scroll position
+window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.card[id]');
+    let current = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        if (pageYOffset >= sectionTop - 200) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    if (current) {
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                const parentLi = link.closest('.nav-item');
+                if (parentLi) {
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    parentLi.classList.add('active');
+                }
+            }
+        });
+    }
 });
+
+// Document download functions
+function downloadFeeStatement() {
+    const financeStatus = document.getElementById('financeStatus');
+    if (financeStatus) {
+        financeStatus.innerHTML = '<p class="loading">Generating your fee statement...</p>';
+        
+        setTimeout(() => {
+            // Generate fee statement
+            const studentName = document.getElementById('dashboardName').textContent;
+            const regNumber = document.getElementById('dashboardRegNumber').textContent;
+            const course = document.getElementById('dashboardCourse').textContent;
+            const yearSemester = document.getElementById('dashboardYearSemester').textContent;
+            const semesterFee = document.getElementById('semesterFee').textContent;
+            const totalPaid = document.getElementById('totalPaid').textContent;
+            const feeBalance = document.getElementById('feeBalance').textContent;
+            
+            // Create fee statement HTML
+            const statementHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
+                        <h2 style="margin-top: 0;">FEE STATEMENT</h2>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Student Name:</strong> ${studentName}</p>
+                        <p><strong>Registration Number:</strong> ${regNumber}</p>
+                        <p><strong>Course:</strong> ${course}</p>
+                        <p><strong>Year/Semester:</strong> ${yearSemester}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <h3>Fee Details:</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Description</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Amount</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Semester Fee</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${semesterFee}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Total Paid</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
+                            </tr>
+                            <tr style="font-weight: bold;">
+                                <td style="border: 1px solid #ddd; padding: 8px;">Outstanding Balance</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${feeBalance}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="margin-top: 50px;">
+                        <p>For any queries regarding your fee statement, please contact the finance office.</p>
+                        <p style="text-align: center; margin-top: 30px;">This is a computer-generated document. No signature required.</p>
+                    </div>
+                </div>
+            `;
+            
+            // Open in new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Fee Statement - ${regNumber}</title>
+                </head>
+                <body>
+                    ${statementHTML}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            financeStatus.innerHTML = '<p class="success">Fee statement generated successfully!</p>';
+        }, 1000);
+    }
+    
+    // Scroll to finance section
+    scrollToSection('finance');
+}
+
+function downloadFeeReceipt() {
+    const financeStatus = document.getElementById('financeStatus');
+    if (financeStatus) {
+        financeStatus.innerHTML = '<p class="loading">Generating your fee receipt...</p>';
+        
+        setTimeout(() => {
+            // Generate receipt number
+            const receiptNo = 'CLIPS' + Math.floor(100000 + Math.random() * 900000);
+            
+            // Get student details
+            const studentName = document.getElementById('dashboardName').textContent;
+            const regNumber = document.getElementById('dashboardRegNumber').textContent;
+            const totalPaid = document.getElementById('totalPaid').textContent;
+            
+            // Create receipt HTML
+            const receiptHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
+                        <h2 style="margin-top: 0;">OFFICIAL RECEIPT</h2>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Receipt Number:</strong> ${receiptNo}</p>
+                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Student Name:</strong> ${studentName}</p>
+                        <p><strong>Registration Number:</strong> ${regNumber}</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <h3>Payment Details:</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Description</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Amount</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Tuition Fee Payment</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
+                            </tr>
+                            <tr style="font-weight: bold;">
+                                <td style="border: 1px solid #ddd; padding: 8px;">Total Amount Paid</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="margin-top: 50px; text-align: center;">
+                        <p>Thank you for your payment!</p>
+                        <p style="margin-top: 30px;">This is a computer-generated document. No signature required.</p>
+                    </div>
+                </div>
+            `;
+            
+            // Open in new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Fee Receipt - ${receiptNo}</title>
+                </head>
+                <body>
+                    ${receiptHTML}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            financeStatus.innerHTML = '<p class="success">Fee receipt generated successfully!</p>';
+        }, 1000);
+    }
+    
+    // Scroll to finance section
+    scrollToSection('finance');
+}
+
+// Make these functions globally available
+window.downloadFeeStatement = downloadFeeStatement;
+window.downloadFeeReceipt = downloadFeeReceipt;
+
+// Function to download exam card
+function showResults() {
+    alert("Results will be available after the end of the semester.");
+}
+
+function showTimetable() {
+    alert("Timetable feature is coming soon!");
+}
+
+function showSem1Timetable() {
+    alert("Semester 1 timetable will be available soon.");
+}
+
+function showSem2Timetable() {
+    alert("Semester 2 timetable will be available soon.");
+}
+
+function showEvaluation() {
+    alert("Course evaluation will be available at the end of the semester.");
+}
+
+function showCourseEvaluation() {
+    alert("Course evaluation will be available at the end of the semester.");
+}
+
+function showSemesterEvaluation() {
+    alert("Semester evaluation will be available at the end of the semester.");
+}
+
+function showSocials() {
+    alert("Social features coming soon!");
+}
+
+function showNews() {
+    alert("College news feed coming soon!");
+}
+
+function showEvents() {
+    alert("College events calendar coming soon!");
+}
+
+function showSettings() {
+    alert("Settings page coming soon!");
+}
+
+function showChangePassword() {
+    alert("Password change feature coming soon!");
+}
+
+// Make all these functions globally available
+window.showResults = showResults;
+window.showTimetable = showTimetable;
+window.showSem1Timetable = showSem1Timetable;
+window.showSem2Timetable = showSem2Timetable;
+window.showEvaluation = showEvaluation;
+window.showCourseEvaluation = showCourseEvaluation;
+window.showSemesterEvaluation = showSemesterEvaluation;
+window.showSocials = showSocials;
+window.showNews = showNews;
+window.showEvents = showEvents;
+window.showSettings = showSettings;
+window.showChangePassword = showChangePassword;
+
+// Handle exam card download
+document.getElementById('downloadExamCardBtn').addEventListener('click', function() {
+    const examCardStatus = document.getElementById('examCardStatus');
+    if (examCardStatus) {
+        examCardStatus.innerHTML = '<p class="loading">Generating your exam card...</p>';
+        
+        setTimeout(() => {
+            // Get student details
+            const studentName = document.getElementById('dashboardName').textContent;
+            const regNumber = document.getElementById('dashboardRegNumber').textContent;
+            const course = document.getElementById('dashboardCourse').textContent;
+            const yearSemester = document.getElementById('dashboardYearSemester').textContent;
+            
+            // Check fee balance
+            const feeBalance = document.getElementById('feeBalance').textContent;
+            const balanceAmount = parseFloat(feeBalance.replace(/[^0-9.-]+/g,""));
+            
+            if (balanceAmount > 0) {
+                examCardStatus.innerHTML = '<p class="error">You have an outstanding fee balance. Please clear your fees to download the exam card.</p>';
+                return;
+            }
+            
+            // Create exam card HTML
+            const examCardHTML = `
+                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
+                        <h2 style="margin-top: 0;">EXAMINATION CARD</h2>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Student Name:</strong> ${studentName}</p>
+                        <p><strong>Registration Number:</strong> ${regNumber}</p>
+                        <p><strong>Course:</strong> ${course}</p>
+                        <p><strong>Year/Semester:</strong> ${yearSemester}</p>
+                        <p><strong>Academic Year:</strong> 2024/2025</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <h3>Registered Units:</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Unit Code</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Unit Name</th>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">CSC 101</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Introduction to Computer Science</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">MAT 112</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Calculus I</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">PHY 118</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">Physics for Computer Scientists</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="margin-top: 50px;">
+                        <p><strong>Important Notes:</strong></p>
+                        <ul>
+                            <li>This examination card must be presented at every examination.</li>
+                            <li>Students must arrive at least 30 minutes before the start of an examination.</li>
+                            <li>No student shall be allowed into an examination room 30 minutes after the start of an examination.</li>
+                            <li>Mobile phones and unauthorized materials are strictly prohibited in examination rooms.</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 30px; text-align: center;">
+                        <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
+                        <p>This is a computer-generated document. No signature required.</p>
+                    </div>
+                </div>
+            `;
+            
+            // Open in new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Exam Card - ${regNumber}</title>
+                </head>
+                <body>
+                    ${examCardHTML}
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            examCardStatus.innerHTML = '<p class="success">Exam card generated successfully!</p>';
+        }, 1000);
+    }
+});
+})

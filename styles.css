@@ -15,7 +15,7 @@
             align-items: center;
             height: 100vh;
             color: var(--text-color);
-            background-image: url('clips img.jpg');
+            background-image: url('background.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
