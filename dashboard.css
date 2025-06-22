@@ -6,7 +6,7 @@
 } 
 
 body {
-    background-color: #3508da;
+    background-image: url('background.jpg');
     color: #333;
     line-height: 1.6;
 }
