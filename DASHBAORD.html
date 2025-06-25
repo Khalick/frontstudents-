@@ -56,6 +56,7 @@
                         <a href="#exam-card">Exam Card</a>
                         <a href="#" onclick="showResults(); return false;">Results</a>
                         <a href="#units-available">Register Units</a>
+                        <a href="#documents">My Documents</a>
                     </div>
                 </li>
                 <li class="nav-item">
@@ -103,9 +104,21 @@
                     </ul>
                 </div>
                 <div class="card" id="units-available">
-                    <h2>Available Units</h2>
-                    <ul class="unit-list" id="availableUnits"></ul>
-                    <div id="unitRegisterStatus"></div>
+                    <h2>Unit Registration</h2>
+                    <div class="unit-registration-form">
+                        <div class="form-group">
+                            <label for="availableUnitsSelect">Select Unit to Register:</label>
+                            <select id="availableUnitsSelect" class="unit-select">
+                                <option value="">Loading available units...</option>
+                            </select>
+                        </div>
+                        <button id="registerUnitBtn" class="register-btn" onclick="registerSelectedUnit()">Register Unit</button>
+                        <div id="unitRegisterStatus" class="status-message"></div>
+                    </div>
+                    <div class="available-units-list">
+                        <h3>Allocated Units</h3>
+                        <ul class="unit-list" id="availableUnits"></ul>
+                    </div>
                 </div>
                 
                 <div class="card student-summary" id="student-info">
@@ -167,10 +180,33 @@
                     <button id="downloadFeeReceiptBtn">Download Fee Receipt</button>
                     <div id="financeStatus"></div>
                 </div>
+                
+                <div class="card" id="documents">
+                    <h2>My Documents</h2>
+                    <div class="documents-grid" id="documentsGrid">
+                        <div class="loading-message">Loading documents...</div>
+                    </div>
+                    <div class="documents-summary">
+                        <p>Total Documents: <span id="documentsCount">0</span></p>
+                    </div>
+                </div>
             </div>
             
             <div class="student-profile">
-                <img src="clips-icon.svg" alt="Student Image" class="student-image" id="studentImage">
+                <div class="student-photo-container">
+                    <div class="student-image-wrapper">
+                        <img src="" alt="Student Photo" class="student-image" id="studentImage" style="display: none;">
+                        <div class="student-avatar" id="studentAvatar">
+                            <div class="avatar-initials" id="avatarInitials">?</div>
+                        </div>
+                    </div>
+                    <div class="photo-status" id="photoStatus">No photo uploaded</div>
+                    <div class="photo-upload-section">
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                        <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
+                        <div id="photoUploadStatus" class="status-message"></div>
+                    </div>
+                </div>
                 <div class="student-details">
                     <h2 id="studentName">Loading...</h2>
                     <p><strong>Registration Number:</strong> <span id="regNumber">Loading...</span></p>
