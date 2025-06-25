@@ -1,27 +1,11 @@
+
 // Check if user is logged in when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard loading... Checking auth...');
-    
-    // Ensure BACKEND_URL is available
-    if (!window.BACKEND_URL && window.APP_CONFIG) {
-        window.BACKEND_URL = window.APP_CONFIG.BACKEND_URL;
-        console.log('Set BACKEND_URL from APP_CONFIG:', window.BACKEND_URL);
-    }
-    
     const username = localStorage.getItem('currentUser');
-    const studentId = localStorage.getItem('studentId');
-    const registrationNumber = localStorage.getItem('registrationNumber');
-    // Check if user is logged in and token exists
+    const studentId = localStorage.getItem('studentId'); // Assuming you store student ID
+      // Check if user is logged in and token exists
     const token = localStorage.getItem('token');
-      console.log('Auth check:', { 
-        usernameExists: !!username, 
-        tokenExists: !!token, 
-        studentIdExists: !!studentId,
-        registrationNumberExists: !!registrationNumber
-    });
-    
-    if (!token) {
-        console.log('Not authenticated, redirecting to login page');
+    if (!username || !token) {
         window.location.href = 'index.html';
         return;
     }
@@ -30,90 +14,50 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.user-info').forEach(element => {
         element.textContent = `Welcome back, ${username}`;
     });
-    
-    // Fetch student data using registration number
-    async function fetchStudentData() {
-        // For demo mode, use hardcoded data if token is demo token
-        if (token === 'demo-token-12345') {
-            console.log('Using demo data for student profile');
-            const demoStudent = {
-                name: 'Demo Student',
-                registration_number: 'CLIP/2023/DEMO',
-                course: 'Diploma in Computer Science',
-                year_semester: 'Year 2, Semester 1'
-            };
-            populateStudentData(demoStudent, [], { fee_balance: 15000, total_paid: 35000, semester_fee: 50000, session_progress: 65 });
-            return;
-        }
-        
-        const regNumber = registrationNumber || username; // Use stored registration number
-        if (!regNumber) {
-            console.error('No registration number found');
-            return;
-        }
-        
+
+    // Fetch student data from backend with Authorization header
+    async function fetchStudentData(studentId) {
+        const baseUrl = BACKEND_URL + '/students/' + studentId;
         try {
-            const backendUrl = window.BACKEND_URL;
-            const apiUrl = `${backendUrl}/student/registration/${regNumber}`;
-            console.log('Fetching student data from:', apiUrl);
-            
-            const res = await fetch(apiUrl, {
+            // Fetch student details
+            const studentRes = await fetch(baseUrl, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (!res.ok) {
-                throw new Error(`Failed to fetch student data: ${res.status}`);
-            }
-            
-            const student = await res.json();
-            console.log('Student data received:', student);
-            populateStudentData(student, [], { fee_balance: 0, total_paid: 0, semester_fee: 0, session_progress: 0 });
-            
-        } catch (error) {
-            console.error('Error fetching student data:', error);
-            const basicStudent = {
-                name: regNumber,
-                registration_number: regNumber,
-                course: 'N/A',
-                year_semester: 'N/A'
-            };
-            populateStudentData(basicStudent, [], { fee_balance: 0, total_paid: 0, semester_fee: 0, session_progress: 0 });
-        }
-    }
-    
-    // Helper function to populate student data in the UI
-    function populateStudentData(student, units, fees) {
-        // Student profile in sidebar
-        document.getElementById('studentName').textContent = student.name || 'N/A';
-        document.getElementById('regNumber').textContent = student.registration_number || 'N/A';
-        document.getElementById('courseName').textContent = student.course || 'N/A';
-        document.getElementById('yearSemester').textContent = student.level_of_study || 'N/A';
-        
-        // Student information in main dashboard
-        if (document.getElementById('dashboardName')) {
-            document.getElementById('dashboardName').textContent = student.name || 'N/A';
-            document.getElementById('dashboardRegNumber').textContent = student.registration_number || 'N/A';
-            document.getElementById('dashboardYearSemester').textContent = student.level_of_study || 'N/A';
-            document.getElementById('dashboardCourse').textContent = student.course || 'N/A';
-        }
-        
-        // Update welcome message with first name
-        const firstName = student.name?.split(' ')[0] || 'Student';
-        document.querySelectorAll('.user-info').forEach(element => {
-            element.textContent = `Welcome back, ${firstName}`;
-        });
-        
-        // Fee details
-        document.getElementById('feeBalance').textContent = fees.fee_balance ? `KSH ${fees.fee_balance}` : 'KSH 0';
-        document.getElementById('totalPaid').textContent = fees.total_paid ? `KSH ${fees.total_paid}` : 'KSH 0';
-        document.getElementById('semesterFee').textContent = fees.semester_fee ? `KSH ${fees.semester_fee}` : 'KSH 0';
-        document.getElementById('sessionProgress').textContent = fees.session_progress ? `${fees.session_progress}%` : '0%';
-        
-        // Registered units
-        const unitsList = document.getElementById('registeredUnits');
-        unitsList.innerHTML = '<li><strong>Unit Name</strong><strong>Unit Code</strong><strong>Status</strong></li>';
-        
-        if (units && units.length > 0) {
+            const student = await studentRes.json();
+            // Fetch units
+            const unitsRes = await fetch(baseUrl + '/units', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const units = await unitsRes.json();
+            // Fetch fee info
+            const feesRes = await fetch(baseUrl + '/fees', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const fees = await feesRes.json();
+
+            // Populate student details from DB
+            document.getElementById('studentName').textContent = student.name || student.username || username;
+            document.getElementById('greetingName').textContent = (student.name || username).split(' ')[0];
+            document.getElementById('regNumber').textContent = student.reg_number || student.regNumber || '';
+            document.getElementById('courseName').textContent = student.course || '';
+            document.getElementById('displayCourse').textContent = student.course || '';
+            document.getElementById('yearSemester').textContent = student.year_semester || '';
+            document.getElementById('studentImage').src = student.photo_url || 'https://via.placeholder.com/120';
+
+            // Use Supabase Storage for student images (future implementation)
+            // Example: Fetch image from Supabase Storage
+            // const { data, error } = await supabase.storage.from('student-images').download('studentId.jpg');
+            // if (data) { document.getElementById('studentImage').src = URL.createObjectURL(data); }
+
+            // Populate fee details from DB
+            document.getElementById('feeBalance').textContent = fees.fee_balance ? `KSH ${fees.fee_balance}` : 'KSH 0';
+            document.getElementById('totalPaid').textContent = fees.total_paid ? `KSH ${fees.total_paid}` : 'KSH 0';
+            document.getElementById('semesterFee').textContent = fees.semester_fee ? `KSH ${fees.semester_fee}` : 'KSH 0';
+            document.getElementById('sessionProgress').textContent = fees.session_progress ? `${fees.session_progress}%` : '0%';
+
+            // Populate registered units from DB
+            const unitsList = document.getElementById('registeredUnits');
+            unitsList.innerHTML = '<li><strong>Unit Name</strong><strong>Unit Code</strong><strong>Status</strong></li>';
             units.forEach(unit => {
                 const unitItem = document.createElement('li');
                 unitItem.innerHTML = `
@@ -122,37 +66,42 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span>${unit.status}</span>
                 `;
                 unitsList.appendChild(unitItem);
-            });
-        } else {
-            const noUnits = document.createElement('li');
-            noUnits.innerHTML = '<span>No registered units found</span>';
-            unitsList.appendChild(noUnits);
+            });                // Fetch and display available units
+                const availableUnitsRes = await fetch(baseUrl + '/available-units', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const availableUnits = await availableUnitsRes.json();
+                const availableUnitsList = document.getElementById('availableUnits');
+                availableUnitsList.innerHTML = ''; // Clear existing content
+                availableUnits.forEach(unit => {
+                    const unitItem = document.createElement('li');
+                    unitItem.innerHTML = `
+                        <span>${unit.name || unit.unit_name}</span>
+                        <span>${unit.code || unit.unit_code}</span>
+                        <button onclick="registerUnit('${unit.id}')">Register</button>
+                    `;
+                    availableUnitsList.appendChild(unitItem);
+                });
+
+                // Registration status message
+                const registrationStatus = document.getElementById('unitRegisterStatus');
+                registrationStatus.textContent = 'You can register for additional units from the available units list.';
+        } catch (error) {
+            console.error('Error fetching student data:', error);
         }
     }
-    
-    // Set basic student info immediately
-    const basicStudent = {
-        name: username || 'Student',
-        registration_number: registrationNumber || username || 'N/A',
-        course: 'N/A',
-        level_of_study: 'N/A'
-    };
-    populateStudentData(basicStudent, [], { fee_balance: 0, total_paid: 0, semester_fee: 0, session_progress: 0 });
-    
+
+    // Call fetchStudentData
+    fetchStudentData(studentId);
+
     // Fetch available units from backend
     async function fetchAvailableUnits() {
-        // For demo mode
-        if (token === 'demo-token-12345') {
-            const demoUnits = [
-                { id: 'demo1', unit_name: 'Advanced Programming', unit_code: 'CS202' },
-                { id: 'demo2', unit_name: 'Computer Networks', unit_code: 'CS304' },
-                { id: 'demo3', unit_name: 'Data Structures', unit_code: 'CS201' }
-            ];
-            
+        try {
+            const res = await fetch(BACKEND_URL + '/units');
+            const units = await res.json();
             const availableUnitsList = document.getElementById('availableUnits');
             availableUnitsList.innerHTML = '';
-            
-            demoUnits.forEach(unit => {
+            units.forEach(unit => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <span>${unit.unit_name}</span>
@@ -161,101 +110,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 availableUnitsList.appendChild(li);
             });
-            
-            return;
-        }
-        
-        try {
-            const backendUrl = window.BACKEND_URL;
-            console.log('Fetching available units from:', backendUrl + '/units');
-            
-            const res = await fetch(backendUrl + '/units');
-            
-            if (!res.ok) {
-                throw new Error('Failed to fetch available units');
-            }
-            
-            const units = await res.json();
-            const availableUnitsList = document.getElementById('availableUnits');
-            availableUnitsList.innerHTML = '';
-            
-            if (units && units.length > 0) {
-                units.forEach(unit => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span>${unit.unit_name}</span>
-                        <span>${unit.unit_code}</span>
-                        <button onclick="registerUnit('${unit.id}')">Register</button>
-                    `;
-                    availableUnitsList.appendChild(li);
-                });
-            } else {
-                availableUnitsList.innerHTML = '<li><span>No available units found</span></li>';
-            }
         } catch (error) {
             console.error('Error fetching available units:', error);
-            document.getElementById('availableUnits').innerHTML = 
-                '<li><span>Failed to load available units. Please try again later.</span></li>';
         }
-    }
-
-    // Make registerUnit function available globally
+    }    // Make registerUnit function available globally
     window.registerUnit = async function(unitId) {
         const studentId = localStorage.getItem('studentId');
         const token = localStorage.getItem('token');
-        
         if (!studentId || !token) {
             alert('You must be logged in.');
             return;
         }
-        
-        // For demo mode
-        if (token === 'demo-token-12345') {
-            console.log('Registering demo unit:', unitId);
-            const statusElement = document.getElementById('unitRegisterStatus');
-            statusElement.textContent = 'Unit registered successfully!';
-            
-            // Add the unit to registered units for demo
-            const unitsList = document.getElementById('registeredUnits');
-            const demoUnitNames = {
-                'demo1': 'Advanced Programming',
-                'demo2': 'Computer Networks',
-                'demo3': 'Data Structures'
-            };
-            const demoUnitCodes = {
-                'demo1': 'CS202',
-                'demo2': 'CS304',
-                'demo3': 'CS201'
-            };
-            
-            if (demoUnitNames[unitId]) {
-                const unitItem = document.createElement('li');
-                unitItem.innerHTML = `
-                    <span>${demoUnitNames[unitId]}</span>
-                    <span>${demoUnitCodes[unitId]}</span>
-                    <span>Registered</span>
-                `;
-                unitsList.appendChild(unitItem);
-                
-                // Remove from available units
-                const availableUnits = document.querySelectorAll('#availableUnits li');
-                for (let i = 0; i < availableUnits.length; i++) {
-                    if (availableUnits[i].textContent.includes(demoUnitNames[unitId])) {
-                        availableUnits[i].remove();
-                        break;
-                    }
-                }
-            }
-            
-            return;
-        }
-        
-        // Real API call
         try {
-            const backendUrl = window.BACKEND_URL;
-            console.log(`Registering unit ${unitId} for student ${studentId}`);
-            
-            const res = await fetch(`${backendUrl}/students/${studentId}/register-unit`, {
+            const res = await fetch(`${BACKEND_URL}/students/${studentId}/register-unit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -263,136 +130,92 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ unit_id: unitId })
             });
-            
             const data = await res.json();
             document.getElementById('unitRegisterStatus').textContent = data.error || 'Unit registered!';
             fetchStudentData(studentId); // Refresh registered units
         } catch (error) {
-            console.error('Error registering unit:', error);
-            document.getElementById('unitRegisterStatus').textContent = 'Error registering unit. Please try again later.';
+            document.getElementById('unitRegisterStatus').textContent = 'Error registering unit.';
         }
     };
 
     // Download exam card
     document.getElementById('downloadExamCardBtn').onclick = async function() {
         const studentId = localStorage.getItem('studentId');
-        const token = localStorage.getItem('token');
-        
-        // For demo mode
-        if (token === 'demo-token-12345') {
-            document.getElementById('examCardStatus').textContent = 'Demo mode: In a real system, your exam card would download here.';
-            setTimeout(() => {
-                document.getElementById('examCardStatus').textContent = '';
-            }, 3000);
-            return;
-        }
-        
-        try {
-            const backendUrl = window.BACKEND_URL;
-            const res = await fetch(`${backendUrl}/students/${studentId}/exam-card`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            const data = await res.json();
-            
-            if (res.status === 403) {
-                document.getElementById('examCardStatus').textContent = data.error || 'You are not authorized to download this exam card.';
-            } else if (res.status === 404) {
-                document.getElementById('examCardStatus').textContent = 'No exam card found.';
-            } else if (data.file_url) {
-                document.getElementById('examCardStatus').textContent = '';
-                window.open(data.file_url, '_blank');
-            } else {
-                document.getElementById('examCardStatus').textContent = 'Failed to download exam card.';
-            }
-        } catch (error) {
-            console.error('Error downloading exam card:', error);
-            document.getElementById('examCardStatus').textContent = 'Network error. Please try again later.';
+        const res = await fetch(`${BACKEND_URL}/students/${studentId}/exam-card`);
+        const data = await res.json();
+        if (res.status === 403) {
+            document.getElementById('examCardStatus').textContent = data.error;
+        } else if (res.status === 404) {
+            document.getElementById('examCardStatus').textContent = 'No exam card found.';
+        } else if (data.file_url) {
+            document.getElementById('examCardStatus').textContent = '';
+            window.open(data.file_url, '_blank');
         }
     }
 
     // Download fee statement and receipt
     document.getElementById('downloadFeeStatementBtn').onclick = async function() {
         const studentId = localStorage.getItem('studentId');
-        const token = localStorage.getItem('token');
-        
-        // For demo mode
-        if (token === 'demo-token-12345') {
-            document.getElementById('financeStatus').textContent = 'Demo mode: In a real system, your fee statement would download here.';
-            setTimeout(() => {
-                document.getElementById('financeStatus').textContent = '';
-            }, 3000);
-            return;
-        }
-        
-        try {
-            const backendUrl = window.BACKEND_URL;
-            const res = await fetch(`${backendUrl}/students/${studentId}/fee-statement`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            const data = await res.json();
-            
-            if (res.status === 404) {
-                document.getElementById('financeStatus').textContent = 'No fee statement found.';
-            } else if (data.statement_url) {
-                document.getElementById('financeStatus').textContent = '';
-                window.open(data.statement_url, '_blank');
-            } else {
-                document.getElementById('financeStatus').textContent = 'Failed to download fee statement.';
-            }
-        } catch (error) {
-            console.error('Error downloading fee statement:', error);
-            document.getElementById('financeStatus').textContent = 'Network error. Please try again later.';
+        const res = await fetch(`${BACKEND_URL}/students/${studentId}/fee-statement`);
+        const data = await res.json();
+        if (res.status === 404) {
+            document.getElementById('financeStatus').textContent = 'No fee statement found.';
+        } else if (data.statement_url) {
+            document.getElementById('financeStatus').textContent = '';
+            window.open(data.statement_url, '_blank');
         }
     };
-    
     document.getElementById('downloadFeeReceiptBtn').onclick = async function() {
         const studentId = localStorage.getItem('studentId');
-        const token = localStorage.getItem('token');
-        
-        // For demo mode
-        if (token === 'demo-token-12345') {
-            document.getElementById('financeStatus').textContent = 'Demo mode: In a real system, your fee receipt would download here.';
-            setTimeout(() => {
-                document.getElementById('financeStatus').textContent = '';
-            }, 3000);
+        const res = await fetch(`${BACKEND_URL}/students/${studentId}/fee-receipt`);
+        const data = await res.json();
+        if (res.status === 404) {
+            document.getElementById('financeStatus').textContent = 'No fee receipt found.';
+        } else if (data.receipt_url) {
+            document.getElementById('financeStatus').textContent = '';
+            window.open(data.receipt_url, '_blank');
+        }
+    }
+
+    // Handle finance file upload
+    document.getElementById('uploadFinanceForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const type = document.getElementById('financeType').value;
+        const studentId = document.getElementById('financeStudentId').value;
+        const fileInput = document.getElementById('financeFile');
+        const file = fileInput.files[0];
+        if (!file || !studentId) {
+            document.getElementById('financeUploadStatus').textContent = 'Please select a file and enter a student ID.';
             return;
         }
-        
-        try {
-            const backendUrl = window.BACKEND_URL;
-            const res = await fetch(`${backendUrl}/students/${studentId}/fee-receipt`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            const data = await res.json();
-            
-            if (res.status === 404) {
-                document.getElementById('financeStatus').textContent = 'No fee receipt found.';
-            } else if (data.receipt_url) {
-                document.getElementById('financeStatus').textContent = '';
-                window.open(data.receipt_url, '_blank');
-            } else {
-                document.getElementById('financeStatus').textContent = 'Failed to download fee receipt.';
-            }
-        } catch (error) {
-            console.error('Error downloading fee receipt:', error);
-            document.getElementById('financeStatus').textContent = 'Network error. Please try again later.';
+        const formData = new FormData();
+        formData.append('file', file);
+        let endpoint = '';
+        if (type === 'statement') {
+            endpoint = `${BACKEND_URL}/students/${studentId}/upload-fee-statement`;
+        } else {
+            endpoint = `${BACKEND_URL}/students/${studentId}/upload-fee-receipt`;
         }
-    };
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('financeUploadStatus').textContent = 'Upload successful!';
+            } else {
+                document.getElementById('financeUploadStatus').textContent = data.error || 'Upload failed.';
+            }
+        } catch (err) {
+            document.getElementById('financeUploadStatus').textContent = 'Network error.';
+        }
+    }
 
-    // fetchAvailableUnits();
-    
-    // Clear registered units list
-    const unitsList = document.getElementById('registeredUnits');
-    unitsList.innerHTML = '<li><strong>Unit Name</strong><strong>Unit Code</strong><strong>Status</strong></li><li><span>No registered units found</span></li>';
-      document.getElementById('logoutBtn').addEventListener('click', function() {
+    fetchAvailableUnits();    document.getElementById('logoutBtn').addEventListener('click', function() {
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
         localStorage.removeItem('studentId');
-        localStorage.removeItem('registrationNumber');
-        localStorage.removeItem('studentData');
         window.location.href = 'index.html';
     });
 
@@ -404,385 +227,4 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error:', error));
     */
-    
-    // Helper function to highlight the active nav item
-function setActiveNavItem(itemSelector) {
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    const activeItem = document.querySelector(itemSelector);
-    if (activeItem) {
-        activeItem.classList.add('active');
-    }
-}
-
-// Function to scroll to a section smoothly
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        window.scrollTo({
-            top: section.offsetTop - 100, // Offset for header
-            behavior: 'smooth'
-        });
-    }
-}
-
-// Highlight sections based on scroll position
-window.addEventListener('scroll', function() {
-    const sections = document.querySelectorAll('.card[id]');
-    let current = '';
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        if (pageYOffset >= sectionTop - 200) {
-            current = section.getAttribute('id');
-        }
-    });
-    
-    if (current) {
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                const parentLi = link.closest('.nav-item');
-                if (parentLi) {
-                    document.querySelectorAll('.nav-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    parentLi.classList.add('active');
-                }
-            }
-        });
-    }
 });
-
-// Document download functions
-function downloadFeeStatement() {
-    const financeStatus = document.getElementById('financeStatus');
-    if (financeStatus) {
-        financeStatus.innerHTML = '<p class="loading">Generating your fee statement...</p>';
-        
-        setTimeout(() => {
-            // Generate fee statement
-            const studentName = document.getElementById('dashboardName').textContent;
-            const regNumber = document.getElementById('dashboardRegNumber').textContent;
-            const course = document.getElementById('dashboardCourse').textContent;
-            const yearSemester = document.getElementById('dashboardYearSemester').textContent;
-            const semesterFee = document.getElementById('semesterFee').textContent;
-            const totalPaid = document.getElementById('totalPaid').textContent;
-            const feeBalance = document.getElementById('feeBalance').textContent;
-            
-            // Create fee statement HTML
-            const statementHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
-                        <h2 style="margin-top: 0;">FEE STATEMENT</h2>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <p><strong>Student Name:</strong> ${studentName}</p>
-                        <p><strong>Registration Number:</strong> ${regNumber}</p>
-                        <p><strong>Course:</strong> ${course}</p>
-                        <p><strong>Year/Semester:</strong> ${yearSemester}</p>
-                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <h3>Fee Details:</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Description</th>
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Amount</th>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Semester Fee</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${semesterFee}</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Total Paid</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
-                            </tr>
-                            <tr style="font-weight: bold;">
-                                <td style="border: 1px solid #ddd; padding: 8px;">Outstanding Balance</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${feeBalance}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div style="margin-top: 50px;">
-                        <p>For any queries regarding your fee statement, please contact the finance office.</p>
-                        <p style="text-align: center; margin-top: 30px;">This is a computer-generated document. No signature required.</p>
-                    </div>
-                </div>
-            `;
-            
-            // Open in new window for printing
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Fee Statement - ${regNumber}</title>
-                </head>
-                <body>
-                    ${statementHTML}
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                        }
-                    </script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            
-            financeStatus.innerHTML = '<p class="success">Fee statement generated successfully!</p>';
-        }, 1000);
-    }
-    
-    // Scroll to finance section
-    scrollToSection('finance');
-}
-
-function downloadFeeReceipt() {
-    const financeStatus = document.getElementById('financeStatus');
-    if (financeStatus) {
-        financeStatus.innerHTML = '<p class="loading">Generating your fee receipt...</p>';
-        
-        setTimeout(() => {
-            // Generate receipt number
-            const receiptNo = 'CLIPS' + Math.floor(100000 + Math.random() * 900000);
-            
-            // Get student details
-            const studentName = document.getElementById('dashboardName').textContent;
-            const regNumber = document.getElementById('dashboardRegNumber').textContent;
-            const totalPaid = document.getElementById('totalPaid').textContent;
-            
-            // Create receipt HTML
-            const receiptHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
-                        <h2 style="margin-top: 0;">OFFICIAL RECEIPT</h2>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <p><strong>Receipt Number:</strong> ${receiptNo}</p>
-                        <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <p><strong>Student Name:</strong> ${studentName}</p>
-                        <p><strong>Registration Number:</strong> ${regNumber}</p>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <h3>Payment Details:</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Description</th>
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Amount</th>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Tuition Fee Payment</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
-                            </tr>
-                            <tr style="font-weight: bold;">
-                                <td style="border: 1px solid #ddd; padding: 8px;">Total Amount Paid</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">${totalPaid}</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div style="margin-top: 50px; text-align: center;">
-                        <p>Thank you for your payment!</p>
-                        <p style="margin-top: 30px;">This is a computer-generated document. No signature required.</p>
-                    </div>
-                </div>
-            `;
-            
-            // Open in new window for printing
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Fee Receipt - ${receiptNo}</title>
-                </head>
-                <body>
-                    ${receiptHTML}
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                        }
-                    </script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            
-            financeStatus.innerHTML = '<p class="success">Fee receipt generated successfully!</p>';
-        }, 1000);
-    }
-    
-    // Scroll to finance section
-    scrollToSection('finance');
-}
-
-// Make these functions globally available
-window.downloadFeeStatement = downloadFeeStatement;
-window.downloadFeeReceipt = downloadFeeReceipt;
-
-// Function to download exam card
-function showResults() {
-    alert("Results will be available after the end of the semester.");
-}
-
-function showTimetable() {
-    alert("Timetable feature is coming soon!");
-}
-
-function showSem1Timetable() {
-    alert("Semester 1 timetable will be available soon.");
-}
-
-function showSem2Timetable() {
-    alert("Semester 2 timetable will be available soon.");
-}
-
-function showEvaluation() {
-    alert("Course evaluation will be available at the end of the semester.");
-}
-
-function showCourseEvaluation() {
-    alert("Course evaluation will be available at the end of the semester.");
-}
-
-function showSemesterEvaluation() {
-    alert("Semester evaluation will be available at the end of the semester.");
-}
-
-function showSocials() {
-    alert("Social features coming soon!");
-}
-
-function showNews() {
-    alert("College news feed coming soon!");
-}
-
-function showEvents() {
-    alert("College events calendar coming soon!");
-}
-
-function showSettings() {
-    alert("Settings page coming soon!");
-}
-
-function showChangePassword() {
-    alert("Password change feature coming soon!");
-}
-
-// Make all these functions globally available
-window.showResults = showResults;
-window.showTimetable = showTimetable;
-window.showSem1Timetable = showSem1Timetable;
-window.showSem2Timetable = showSem2Timetable;
-window.showEvaluation = showEvaluation;
-window.showCourseEvaluation = showCourseEvaluation;
-window.showSemesterEvaluation = showSemesterEvaluation;
-window.showSocials = showSocials;
-window.showNews = showNews;
-window.showEvents = showEvents;
-window.showSettings = showSettings;
-window.showChangePassword = showChangePassword;
-
-// Handle exam card download
-document.getElementById('downloadExamCardBtn').addEventListener('click', function() {
-    const examCardStatus = document.getElementById('examCardStatus');
-    if (examCardStatus) {
-        examCardStatus.innerHTML = '<p class="loading">Generating your exam card...</p>';
-        
-        setTimeout(() => {
-            // Get student details
-            const studentName = document.getElementById('dashboardName').textContent;
-            const regNumber = document.getElementById('dashboardRegNumber').textContent;
-            const course = document.getElementById('dashboardCourse').textContent;
-            const yearSemester = document.getElementById('dashboardYearSemester').textContent;
-            
-            // Check fee balance
-            const feeBalance = document.getElementById('feeBalance').textContent;
-            const balanceAmount = parseFloat(feeBalance.replace(/[^0-9.-]+/g,""));
-            
-            if (balanceAmount > 0) {
-                examCardStatus.innerHTML = '<p class="error">You have an outstanding fee balance. Please clear your fees to download the exam card.</p>';
-                return;
-            }
-            
-            // Create exam card HTML
-            const examCardHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 2px solid #1a022b;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h1 style="color: #1a022b; margin-bottom: 5px;">CLIPS TECHNICAL COLLEGE</h1>
-                        <h2 style="margin-top: 0;">EXAMINATION CARD</h2>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <p><strong>Student Name:</strong> ${studentName}</p>
-                        <p><strong>Registration Number:</strong> ${regNumber}</p>
-                        <p><strong>Course:</strong> ${course}</p>
-                        <p><strong>Year/Semester:</strong> ${yearSemester}</p>
-                        <p><strong>Academic Year:</strong> 2024/2025</p>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <h3>Registered Units:</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Unit Code</th>
-                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Unit Name</th>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">CSC 101</td>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Introduction to Computer Science</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">MAT 112</td>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Calculus I</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">PHY 118</td>
-                                <td style="border: 1px solid #ddd; padding: 8px;">Physics for Computer Scientists</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div style="margin-top: 50px;">
-                        <p><strong>Important Notes:</strong></p>
-                        <ul>
-                            <li>This examination card must be presented at every examination.</li>
-                            <li>Students must arrive at least 30 minutes before the start of an examination.</li>
-                            <li>No student shall be allowed into an examination room 30 minutes after the start of an examination.</li>
-                            <li>Mobile phones and unauthorized materials are strictly prohibited in examination rooms.</li>
-                        </ul>
-                    </div>
-                    <div style="margin-top: 30px; text-align: center;">
-                        <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
-                        <p>This is a computer-generated document. No signature required.</p>
-                    </div>
-                </div>
-            `;
-            
-            // Open in new window for printing
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Exam Card - ${regNumber}</title>
-                </head>
-                <body>
-                    ${examCardHTML}
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                        }
-                    </script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            
-            examCardStatus.innerHTML = '<p class="success">Exam card generated successfully!</p>';
-        }, 1000);
-    }
-});
-})
