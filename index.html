@@ -84,6 +84,12 @@
                 window.BACKEND_URL = window.APP_CONFIG.BACKEND_URL;
             }
             console.log('Backend URL:', window.BACKEND_URL || 'Not defined');
+            
+            // Initialize login status
+            const loginStatus = document.getElementById('loginStatus');
+            if (loginStatus) {
+                loginStatus.textContent = '';
+            }
         });
     </script>
 </body>

@@ -153,8 +153,10 @@ nav {
 .unit-list li {
     padding: 8px 0;
     border-bottom: 1px solid #88B04B;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: center;
 }
 
 .student-profile {
@@ -365,6 +367,22 @@ button {
     background-color: #8a0347;
 }
 
+.drop-unit-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+    margin-left: 5px;
+}
+
+.drop-unit-btn:hover {
+    background-color: #c82333;
+}
+
 .available-units-list {
     margin-top: 20px;
 }
@@ -513,6 +531,132 @@ button {
     font-weight: bold;
 }
 
+/* Edit Mode Styles */
+.edit-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.edit-input {
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+    background-color: white;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.edit-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+.status-message {
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Hidden elements */
+.hidden {
+    display: none !important;
+}
+
+/* Photo upload styles */
+.upload-photo-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.upload-photo-btn:hover {
+    background-color: #138496;
+}
+
+.student-image-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.student-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+.student-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -570,6 +714,7 @@ button {
     }
     
     .unit-list li {
+        display: flex;
         flex-direction: column;
         gap: 5px;
         text-align: left;
@@ -762,4 +907,16 @@ button {
     background-color: #d1ecf1;
     color: #0c5460;
     border: 1px solid #bee5eb;
+}
+
+#unitDropStatus {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    display: none;
+}
+
+#unitDropStatus:not(:empty) {
+    display: block;
 }

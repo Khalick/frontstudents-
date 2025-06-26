@@ -31,7 +31,7 @@
                 </div>
                 <div class="logout-container">
                     <div class="user-info">Welcome back</div>
-                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                    <button class="logout-btn" id="logoutBtn" onclick="window.logout()">Logout</button>
                 </div>
             </div>
         </div>
@@ -95,11 +95,13 @@
             <div class="dashboard">
                 <div class="card" id="units-registered">
                     <h2>Current Registered Units</h2>
+                    <div id="unitDropStatus" class="status-message"></div>
                     <ul class="unit-list" id="registeredUnits">
                         <li>
                             <strong>Unit Name</strong>
                             <strong>Unit Code</strong>
                             <strong>Status</strong>
+                            <strong>Action</strong>
                         </li>
                     </ul>
                 </div>
@@ -122,7 +124,9 @@
                 </div>
                 
                 <div class="card student-summary" id="student-info">
-                    <h2>Student Information</h2>
+                    <h2>Student Information 
+                        <button id="editInfoBtn" class="edit-btn" onclick="toggleEditMode()">Edit Info</button>
+                    </h2>
                     <div class="student-summary-details">
                         <div class="student-info-item">
                             <span class="info-label">Name:</span>
@@ -133,13 +137,39 @@
                             <span class="info-value" id="dashboardRegNumber">Loading...</span>
                         </div>
                         <div class="student-info-item">
-                            <span class="info-label">Year/Semester:</span>
-                            <span class="info-value" id="dashboardYearSemester">Loading...</span>
-                        </div>
-                        <div class="student-info-item">
                             <span class="info-label">Course:</span>
                             <span class="info-value" id="dashboardCourse">Loading...</span>
                         </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Level of Study:</span>
+                            <span class="info-value" id="dashboardLevelOfStudy">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value" id="dashboardStatus">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">National ID:</span>
+                            <span class="info-value" id="dashboardNationalId">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Date of Birth:</span>
+                            <span class="info-value" id="dashboardDateOfBirth">Loading...</span>
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value" id="dashboardEmail">Loading...</span>
+                            <input type="email" id="editDashboardEmail" class="edit-input" style="display: none;" placeholder="Enter email">
+                        </div>
+                        <div class="student-info-item">
+                            <span class="info-label">Academic Status:</span>
+                            <span class="info-value" id="dashboardAcademicStatus">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="edit-actions" id="editActions" style="display: none;">
+                        <button id="saveChangesBtn" class="save-btn" onclick="saveStudentInfo()">Save Changes</button>
+                        <button id="cancelEditBtn" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+                        <div id="editStatus" class="status-message"></div>
                     </div>
                 </div>
                 
@@ -200,10 +230,10 @@
                             <div class="avatar-initials" id="avatarInitials">?</div>
                         </div>
                     </div>
-                    <div class="photo-status" id="photoStatus">No photo uploaded</div>
+                   
                     <div class="photo-upload-section">
                         <input type="file" id="photoInput" accept="image/*" style="display: none;">
-                        <button id="uploadPhotoBtn" class="upload-photo-btn">Upload Photo</button>
+                        <button id="uploadPhotoBtn" class="upload-photo-btn">Update Photo</button>
                         <div id="photoUploadStatus" class="status-message"></div>
                     </div>
                 </div>
@@ -211,7 +241,14 @@
                     <h2 id="studentName">Loading...</h2>
                     <p><strong>Registration Number:</strong> <span id="regNumber">Loading...</span></p>
                     <p><strong>Course:</strong> <span id="courseName">Loading...</span></p>
-                    <p><strong>Year/Semester:</strong> <span id="yearSemester">Loading...</span></p>
+                    <p><strong>Level of Study:</strong> <span id="levelOfStudy">Loading...</span></p>
+                    <p><strong>Status:</strong> <span id="studentStatus">Loading...</span></p>
+                    <p><strong>National ID:</strong> <span id="nationalId">Loading...</span></p>
+                    <p><strong>Date of Birth:</strong> <span id="dateOfBirth">Loading...</span></p>
+                    <p><strong>Email:</strong> 
+                        <span id="studentEmail">Loading...</span>
+                        <input type="email" id="editStudentEmail" class="edit-input" style="display: none;" placeholder="Enter email">
+                    </p>
                 </div>
             </div>
         </div>

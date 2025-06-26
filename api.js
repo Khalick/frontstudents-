@@ -1,29 +1,71 @@
 async function login() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        if (username && password) {
-            try {
-                const res = await fetch(`${BACKEND_URL}/auth/student-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-                if (res.ok && data.token) {                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('currentUser', username);
-                    localStorage.setItem('studentId', data.student_id);
-                    setTimeout(() => {
-                        window.location.href = 'DASHBAORD.html';
-                    }, 1000);
-                } else {
-                    alert(data.error || 'Login failed');
-                }
-            } catch (err) {
-                alert('Network error. Please try again.');
+    const registrationNumber = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (registrationNumber && password) {
+        try {
+            // Get the backend URL from window.APP_CONFIG
+            const backendUrl = window.APP_CONFIG?.BACKEND_URL || 'http://localhost:3000';
+            console.log(`Attempting login to ${backendUrl}/auth/student-login`);
+            
+            document.getElementById('loginStatus').textContent = 'Connecting to server...';
+            
+            const res = await fetch(`${backendUrl}/auth/student-login`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    registration_number: registrationNumber.trim(),
+                    password: password.trim()
+                })
+            });
+            
+            console.log('Response status:', res.status);
+            const data = await res.json();
+            console.log('Response data:', data);
+            
+            if (res.ok && data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', data.student?.name || data.name || registrationNumber);
+                localStorage.setItem('studentId', data.student_id || data.studentId || data.student?.id || data.id);
+                
+                // Explicitly store registration number
+                const regNumber = data.student?.reg_number || data.student?.registration_number || 
+                                 data.reg_number || data.registration_number || registrationNumber;
+                localStorage.setItem('registrationNumber', regNumber);
+                
+                // Store complete student data
+                const studentData = data.student || {
+                    name: data.name || registrationNumber,
+                    reg_number: regNumber,
+                    course: data.course || 'N/A',
+                    year_semester: data.year_semester || 'N/A',
+                    id: data.student_id || data.studentId || data.id
+                };
+                localStorage.setItem('studentData', JSON.stringify(studentData));
+                
+                document.getElementById('loginStatus').textContent = 'Login successful! Redirecting...';
+                document.getElementById('loginStatus').style.color = '#04b613';
+                
+                setTimeout(() => {
+                    window.location.href = 'DASHBAORD.html';
+                }, 1000);
+            } else {
+                document.getElementById('loginStatus').textContent = data.error || data.message || 'Login failed';
+                document.getElementById('loginStatus').style.color = '#ff3333';
+                console.error('Login failed:', data);
             }
-        } else {
-            alert('Please enter both username and password');
+        } catch (err) {
+            console.error('Login error:', err);
+            document.getElementById('loginStatus').textContent = 'Network error. Please try again.';
+            document.getElementById('loginStatus').style.color = '#ff3333';
         }
+    } else {
+        document.getElementById('loginStatus').textContent = 'Please enter both registration number and password';
+        document.getElementById('loginStatus').style.color = '#ff3333';
+    }
     }
 
 // Forgot Password Functions
@@ -100,8 +142,14 @@ window.onclick = function(event) {
     }
 }
 
-document.getElementById('password').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        login();
+// Add event listener for Enter key on password field
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordField = document.getElementById('password');
+    if (passwordField) {
+        passwordField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
     }
 });
